@@ -11,22 +11,31 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class ExcelService {
+public class ExcelAndPdfService {
     private final CourseRepository courseRepository;
 
-    public ExcelService(CourseRepository courseRepository) {
+    public ExcelAndPdfService(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
     }
 
-    public void saveCourse(Course course){
-        courseRepository.save(course);
+    public Course saveCourse(Course course){
+        return courseRepository.save(course);
+    }
+
+    public Course getCourseById(Long id){
+        Optional<Course> course = courseRepository.findById(id);
+        if(!course.isPresent()){
+            return null;
+        }
+        return course.get();
     }
 
 
     public void generateExcel(HttpServletResponse response) throws IOException {
-        //first,get data from the database
+
         List<Course> courseList = courseRepository.findAll();
 
         try(XSSFWorkbook workbook = new XSSFWorkbook();
@@ -49,5 +58,6 @@ public class ExcelService {
             throw new RuntimeException("Failed to export excel file: " + exception.getMessage(), exception);
         }
     }
+
 }
 
